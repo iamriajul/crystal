@@ -92,7 +92,7 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
       setClaudeEnvironmentVariables(data.claudeEnvironmentVariables || {});
 
       // Load smart session names configuration
-      setSessionNamesApiKey(data.sessionNamesApiKey || data.anthropicApiKey || '');
+      setSessionNamesApiKey(data.sessionNamesApiKey || '');
       setSessionNamesBaseUrl(data.sessionNamesBaseUrl || '');
       setSessionNamesModel(data.sessionNamesModel || '');
       
@@ -131,10 +131,10 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
         notifications: notificationSettings,
         // Environment variables for Claude processes
         claudeEnvironmentVariables,
-        // Smart session names configuration
-        sessionNamesApiKey,
-        sessionNamesBaseUrl,
-        sessionNamesModel
+        // Smart session names configuration (only save if not empty)
+        ...(sessionNamesApiKey && { sessionNamesApiKey }),
+        ...(sessionNamesBaseUrl && { sessionNamesBaseUrl }),
+        ...(sessionNamesModel && { sessionNamesModel })
       });
 
       if (!response.success) {
@@ -256,7 +256,7 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
                   onChange={(e) => setSessionNamesApiKey(e.target.value)}
                   placeholder="sk-ant-..."
                   fullWidth
-                  helperText="API key for generating session names. Uses the same provider as below if left empty."
+                  helperText="API key for generating session names. If empty, will use your main Anthropic API key."
                 />
                 <Input
                   label="Base URL"
