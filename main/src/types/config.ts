@@ -30,6 +30,12 @@ export interface AppConfig {
   devMode?: boolean;
   // Additional paths to add to PATH environment variable
   additionalPaths?: string[];
+  // Environment variables for Claude processes
+  claudeEnvironmentVariables?: Record<string, string>;
+  // Smart session names configuration
+  sessionNamesApiKey?: string;
+  sessionNamesBaseUrl?: string;
+  sessionNamesModel?: string;
 }
 
 export interface UpdateConfigRequest {
@@ -52,4 +58,10 @@ export interface UpdateConfigRequest {
   };
   devMode?: boolean;
   additionalPaths?: string[];
+  // Environment variables for Claude processes
+  claudeEnvironmentVariables?: Record<string, string>;
+  // Smart session names configuration
+  sessionNamesApiKey?: string;
+  sessionNamesBaseUrl?: string;
+  sessionNamesModel?: string;
 }

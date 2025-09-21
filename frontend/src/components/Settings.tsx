@@ -40,6 +40,14 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
   const [devMode, setDevMode] = useState(false);
   const [additionalPathsText, setAdditionalPathsText] = useState('');
   const [platform, setPlatform] = useState<string>('darwin');
+  // Environment variables for Claude processes
+  const [claudeEnvironmentVariables, setClaudeEnvironmentVariables] = useState<Record<string, string>>({});
+  const [newEnvVarName, setNewEnvVarName] = useState('');
+  const [newEnvVarValue, setNewEnvVarValue] = useState('');
+  // Smart session names configuration
+  const [sessionNamesApiKey, setSessionNamesApiKey] = useState('');
+  const [sessionNamesBaseUrl, setSessionNamesBaseUrl] = useState('');
+  const [sessionNamesModel, setSessionNamesModel] = useState('');
   const [notificationSettings, setNotificationSettings] = useState({
     enabled: true,
     playSound: true,
@@ -75,10 +83,18 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
       setDefaultPermissionMode(data.defaultPermissionMode || 'ignore');
       setAutoCheckUpdates(data.autoCheckUpdates !== false); // Default to true
       setDevMode(data.devMode || false);
-      
+
       // Load additional paths
       const paths = data.additionalPaths || [];
       setAdditionalPathsText(paths.join('\n'));
+
+      // Load environment variables for Claude processes
+      setClaudeEnvironmentVariables(data.claudeEnvironmentVariables || {});
+
+      // Load smart session names configuration
+      setSessionNamesApiKey(data.sessionNamesApiKey || data.anthropicApiKey || '');
+      setSessionNamesBaseUrl(data.sessionNamesBaseUrl || '');
+      setSessionNamesModel(data.sessionNamesModel || '');
       
       // Load notification settings
       if (data.notifications) {
@@ -103,16 +119,22 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
         .map(p => p.trim())
         .filter(p => p.length > 0);
       
-      const response = await API.config.update({ 
-        verbose, 
-        anthropicApiKey, 
-        systemPromptAppend: globalSystemPrompt, 
+      const response = await API.config.update({
+        verbose,
+        anthropicApiKey,
+        systemPromptAppend: globalSystemPrompt,
         claudeExecutablePath,
         defaultPermissionMode,
         autoCheckUpdates,
         devMode,
         additionalPaths: parsedPaths,
-        notifications: notificationSettings
+        notifications: notificationSettings,
+        // Environment variables for Claude processes
+        claudeEnvironmentVariables,
+        // Smart session names configuration
+        sessionNamesApiKey,
+        sessionNamesBaseUrl,
+        sessionNamesModel
       });
 
       if (!response.success) {
@@ -228,13 +250,29 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
                 icon={<FileText className="w-4 h-4" />}
               >
                 <Input
-                  label="Anthropic API Key"
+                  label="API Key"
                   type="password"
-                  value={anthropicApiKey}
-                  onChange={(e) => setAnthropicApiKey(e.target.value)}
+                  value={sessionNamesApiKey}
+                  onChange={(e) => setSessionNamesApiKey(e.target.value)}
                   placeholder="sk-ant-..."
                   fullWidth
-                  helperText="Optional: Used only for generating session names. Your main Claude Code API key is separate."
+                  helperText="API key for generating session names. Uses the same provider as below if left empty."
+                />
+                <Input
+                  label="Base URL"
+                  value={sessionNamesBaseUrl}
+                  onChange={(e) => setSessionNamesBaseUrl(e.target.value)}
+                  placeholder="https://api.anthropic.com"
+                  fullWidth
+                  helperText="Custom API endpoint for third-party providers."
+                />
+                <Input
+                  label="Model"
+                  value={sessionNamesModel}
+                  onChange={(e) => setSessionNamesModel(e.target.value)}
+                  placeholder="claude-3-5-sonnet-20241022"
+                  fullWidth
+                  helperText="Model to use for session name generation."
                 />
               </SettingsSection>
 
@@ -300,6 +338,100 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
                   fullWidth
                   helperText="These instructions will be added to every Claude session across all projects."
                 />
+              </SettingsSection>
+
+              <SettingsSection
+                title="Environment Variables"
+                description="Configure environment variables for Claude Code processes"
+                icon={<FileText className="w-4 h-4" />}
+              >
+                <div className="space-y-4">
+                  <div className="p-4 bg-surface-secondary rounded-lg border border-border-secondary">
+                    <h4 className="text-sm font-medium mb-2">Example Environment Variables</h4>
+                    <div className="space-y-1 text-xs text-text-secondary">
+                      <div><code className="bg-surface-tertiary px-1 rounded">CLAUDE_CODE_OAUTH_TOKEN</code> - OAuth token for authentication</div>
+                      <div><code className="bg-surface-tertiary px-1 rounded">ANTHROPIC_BASE_URL</code> - Custom API endpoint URL</div>
+                      <div><code className="bg-surface-tertiary px-1 rounded">ANTHROPIC_API_KEY</code> - Anthropic API key</div>
+                      <div><code className="bg-surface-tertiary px-1 rounded">ANTHROPIC_AUTH_TOKEN</code> - Authentication token</div>
+                      <div><code className="bg-surface-tertiary px-1 rounded">ANTHROPIC_MODEL</code> - Model selection</div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="text-sm font-medium">Custom Environment Variables</div>
+                    {Object.entries(claudeEnvironmentVariables).map(([key, value]) => (
+                      <div key={key} className="flex gap-2 items-center">
+                        <Input
+                          value={key}
+                          onChange={(e) => {
+                            const newVars = { ...claudeEnvironmentVariables };
+                            delete newVars[key];
+                            setClaudeEnvironmentVariables(newVars);
+                            setNewEnvVarName(e.target.value);
+                          }}
+                          placeholder="Variable name"
+                          className="flex-1"
+                        />
+                        <Input
+                          value={value}
+                          onChange={(e) => {
+                            setClaudeEnvironmentVariables({
+                              ...claudeEnvironmentVariables,
+                              [key]: e.target.value
+                            });
+                          }}
+                          placeholder="Value"
+                          className="flex-1"
+                          type={key.toLowerCase().includes('token') || key.toLowerCase().includes('key') ? 'password' : 'text'}
+                        />
+                        <Button
+                          onClick={() => {
+                            const newVars = { ...claudeEnvironmentVariables };
+                            delete newVars[key];
+                            setClaudeEnvironmentVariables(newVars);
+                          }}
+                          variant="ghost"
+                          size="sm"
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    ))}
+
+                    <div className="flex gap-2 items-center pt-2 border-t border-border-secondary">
+                      <Input
+                        value={newEnvVarName}
+                        onChange={(e) => setNewEnvVarName(e.target.value)}
+                        placeholder="New variable name"
+                        className="flex-1"
+                      />
+                      <Input
+                        value={newEnvVarValue}
+                        onChange={(e) => setNewEnvVarValue(e.target.value)}
+                        placeholder="Value"
+                        className="flex-1"
+                        type={newEnvVarName.toLowerCase().includes('token') || newEnvVarName.toLowerCase().includes('key') ? 'password' : 'text'}
+                      />
+                      <Button
+                        onClick={() => {
+                          if (newEnvVarName.trim() && newEnvVarValue.trim()) {
+                            setClaudeEnvironmentVariables({
+                              ...claudeEnvironmentVariables,
+                              [newEnvVarName.trim()]: newEnvVarValue.trim()
+                            });
+                            setNewEnvVarName('');
+                            setNewEnvVarValue('');
+                          }
+                        }}
+                        variant="secondary"
+                        size="sm"
+                        disabled={!newEnvVarName.trim() || !newEnvVarValue.trim()}
+                      >
+                        Add
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               </SettingsSection>
             </CollapsibleCard>
 

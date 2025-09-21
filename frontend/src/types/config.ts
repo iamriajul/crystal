@@ -18,4 +18,10 @@ export interface AppConfig {
     notifyOnComplete: boolean;
   };
   devMode?: boolean;
+  // Environment variables for Claude processes
+  claudeEnvironmentVariables?: Record<string, string>;
+  // Smart session names configuration
+  sessionNamesApiKey?: string;
+  sessionNamesBaseUrl?: string;
+  sessionNamesModel?: string;
 }

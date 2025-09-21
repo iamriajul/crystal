@@ -186,20 +186,25 @@ export class ClaudeCodeManager extends AbstractCliManager {
 
   protected async initializeCliEnvironment(options: ClaudeSpawnOptions): Promise<{ [key: string]: string }> {
     const { sessionId, permissionMode } = options;
-    
+
     // Get basic system environment
     const systemEnv = await this.getSystemEnvironment();
-    
-    // Initialize environment with MCP-specific variables
+
+    // Get configuration for third-party LLM provider
+    const config = this.configManager?.getConfig();
+
+    // Initialize environment with MCP-specific variables and third-party LLM provider settings
     const env: { [key: string]: string } = {
       // Ensure MCP-related environment variables are preserved
       MCP_SOCKET_PATH: this.permissionIpcPath || '',
       // Add debug mode for MCP if verbose logging is enabled
-      ...(this.configManager?.getConfig()?.verbose ? { MCP_DEBUG: '1' } : {})
+      ...(config?.verbose ? { MCP_DEBUG: '1' } : {}),
+      // Add custom environment variables if configured
+      ...(config?.claudeEnvironmentVariables || {})
     };
 
     // Set up MCP configuration if permission approval is requested
-    const defaultMode = this.configManager?.getConfig()?.defaultPermissionMode || 'ignore';
+    const defaultMode = config?.defaultPermissionMode || 'ignore';
     const effectiveMode = permissionMode || defaultMode;
 
     if (effectiveMode === 'approve' && this.permissionIpcPath) {
