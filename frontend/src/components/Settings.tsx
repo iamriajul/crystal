@@ -32,7 +32,6 @@ interface SettingsProps {
 export function Settings({ isOpen, onClose }: SettingsProps) {
   const [_config, setConfig] = useState<AppConfig | null>(null);
   const [verbose, setVerbose] = useState(false);
-  const [anthropicApiKey, setAnthropicApiKey] = useState('');
   const [globalSystemPrompt, setGlobalSystemPrompt] = useState('');
   const [claudeExecutablePath, setClaudeExecutablePath] = useState('');
   const [defaultPermissionMode, setDefaultPermissionMode] = useState<'approve' | 'ignore'>('ignore');
@@ -45,9 +44,9 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
   const [newEnvVarName, setNewEnvVarName] = useState('');
   const [newEnvVarValue, setNewEnvVarValue] = useState('');
   // Smart session names configuration
-  const [sessionNamesApiKey, setSessionNamesApiKey] = useState('');
-  const [sessionNamesBaseUrl, setSessionNamesBaseUrl] = useState('');
-  const [sessionNamesModel, setSessionNamesModel] = useState('');
+  const [anthropicApiKey, setAnthropicApiKey] = useState('');
+  const [anthropicBaseUrl, setAnthropicBaseUrl] = useState('');
+  const [anthropicModel, setAnthropicModel] = useState('');
   const [notificationSettings, setNotificationSettings] = useState({
     enabled: true,
     playSound: true,
@@ -92,9 +91,9 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
       setClaudeEnvironmentVariables(data.claudeEnvironmentVariables || {});
 
       // Load smart session names configuration
-      setSessionNamesApiKey(data.sessionNamesApiKey || '');
-      setSessionNamesBaseUrl(data.sessionNamesBaseUrl || '');
-      setSessionNamesModel(data.sessionNamesModel || '');
+      setAnthropicApiKey(data.anthropicApiKey || '');
+      setAnthropicBaseUrl(data.anthropicBaseUrl || '');
+      setAnthropicModel(data.anthropicModel || '');
       
       // Load notification settings
       if (data.notifications) {
@@ -132,9 +131,9 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
         // Environment variables for Claude processes
         claudeEnvironmentVariables,
         // Smart session names configuration (only save if not empty)
-        ...(sessionNamesApiKey && { sessionNamesApiKey }),
-        ...(sessionNamesBaseUrl && { sessionNamesBaseUrl }),
-        ...(sessionNamesModel && { sessionNamesModel })
+        ...(anthropicApiKey && { anthropicApiKey }),
+        ...(anthropicBaseUrl && { anthropicBaseUrl }),
+        ...(anthropicModel && { anthropicModel })
       });
 
       if (!response.success) {
@@ -252,24 +251,24 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
                 <Input
                   label="API Key"
                   type="password"
-                  value={sessionNamesApiKey}
-                  onChange={(e) => setSessionNamesApiKey(e.target.value)}
+                  value={anthropicApiKey}
+                  onChange={(e) => setAnthropicApiKey(e.target.value)}
                   placeholder="sk-ant-..."
                   fullWidth
                   helperText="API key for generating session names. If empty, will use your main Anthropic API key."
                 />
                 <Input
                   label="Base URL"
-                  value={sessionNamesBaseUrl}
-                  onChange={(e) => setSessionNamesBaseUrl(e.target.value)}
+                  value={anthropicBaseUrl}
+                  onChange={(e) => setAnthropicBaseUrl(e.target.value)}
                   placeholder="https://api.anthropic.com"
                   fullWidth
                   helperText="Custom API endpoint for third-party providers."
                 />
                 <Input
                   label="Model"
-                  value={sessionNamesModel}
-                  onChange={(e) => setSessionNamesModel(e.target.value)}
+                  value={anthropicModel}
+                  onChange={(e) => setAnthropicModel(e.target.value)}
                   placeholder="claude-3-5-sonnet-20241022"
                   fullWidth
                   helperText="Model to use for session name generation."
@@ -348,12 +347,8 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
                 <div className="space-y-4">
                   <div className="p-4 bg-surface-secondary rounded-lg border border-border-secondary">
                     <h4 className="text-sm font-medium mb-2">Example Environment Variables</h4>
-                    <div className="space-y-1 text-xs text-text-secondary">
-                      <div><code className="bg-surface-tertiary px-1 rounded">CLAUDE_CODE_OAUTH_TOKEN</code> - OAuth token for authentication</div>
-                      <div><code className="bg-surface-tertiary px-1 rounded">ANTHROPIC_BASE_URL</code> - Custom API endpoint URL</div>
-                      <div><code className="bg-surface-tertiary px-1 rounded">ANTHROPIC_API_KEY</code> - Anthropic API key</div>
-                      <div><code className="bg-surface-tertiary px-1 rounded">ANTHROPIC_AUTH_TOKEN</code> - Authentication token</div>
-                      <div><code className="bg-surface-tertiary px-1 rounded">ANTHROPIC_MODEL</code> - Model selection</div>
+                    <div className="text-xs text-text-secondary">
+                      <code className="bg-surface-tertiary px-1 rounded">CLAUDE_CODE_OAUTH_TOKEN</code>, <code className="bg-surface-tertiary px-1 rounded">ANTHROPIC_BASE_URL</code>, <code className="bg-surface-tertiary px-1 rounded">ANTHROPIC_API_KEY</code>, <code className="bg-surface-tertiary px-1 rounded">ANTHROPIC_AUTH_TOKEN</code>, <code className="bg-surface-tertiary px-1 rounded">ANTHROPIC_MODEL</code>
                     </div>
                   </div>
 

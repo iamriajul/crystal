@@ -21,9 +21,9 @@ export class WorktreeNameGenerator {
   private initializeAnthropic(): void {
     const config = this.configManager.getConfig();
 
-    // Use session names configuration if available, otherwise fall back to general Anthropic config
-    const apiKey = config.sessionNamesApiKey || config.anthropicApiKey;
-    const baseUrl = config.sessionNamesBaseUrl;
+    // Use smart session names configuration if available, otherwise fall back to general Anthropic config
+    const apiKey = config.anthropicApiKey;
+    const baseUrl = config.anthropicBaseUrl;
 
     if (apiKey) {
       console.log('[WorktreeNameGenerator] Initializing Anthropic client with API key');
@@ -53,7 +53,7 @@ export class WorktreeNameGenerator {
 
     // Get the configured model for session names, fall back to default if not specified
     const config = this.configManager.getConfig();
-    const model = config.sessionNamesModel || 'claude-3-haiku-20240307';
+    const model = config.anthropicModel || 'claude-3-haiku-20240307';
 
     console.log('[WorktreeNameGenerator] Attempting AI-powered name generation for prompt:', prompt.substring(0, 50) + '...');
     console.log('[WorktreeNameGenerator] Using model:', model);

@@ -1,6 +1,5 @@
 export interface AppConfig {
   verbose?: boolean;
-  anthropicApiKey?: string;
   // Legacy fields for backward compatibility
   gitRepoPath?: string;
   systemPromptAppend?: string;
@@ -33,14 +32,13 @@ export interface AppConfig {
   // Environment variables for Claude processes
   claudeEnvironmentVariables?: Record<string, string>;
   // Smart session names configuration
-  sessionNamesApiKey?: string;
-  sessionNamesBaseUrl?: string;
-  sessionNamesModel?: string;
+  anthropicApiKey?: string;
+  anthropicBaseUrl?: string;
+  anthropicModel?: string;
 }
 
 export interface UpdateConfigRequest {
   verbose?: boolean;
-  anthropicApiKey?: string;
   claudeExecutablePath?: string;
   systemPromptAppend?: string;
   defaultPermissionMode?: 'approve' | 'ignore';
@@ -61,7 +59,7 @@ export interface UpdateConfigRequest {
   // Environment variables for Claude processes
   claudeEnvironmentVariables?: Record<string, string>;
   // Smart session names configuration
-  sessionNamesApiKey?: string;
-  sessionNamesBaseUrl?: string;
-  sessionNamesModel?: string;
+  anthropicApiKey?: string;
+  anthropicBaseUrl?: string;
+  anthropicModel?: string;
 }

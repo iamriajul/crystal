@@ -1,7 +1,6 @@
 export interface AppConfig {
   gitRepoPath: string;
   verbose?: boolean;
-  anthropicApiKey?: string;
   systemPromptAppend?: string;
   runScript?: string[];
   claudeExecutablePath?: string;
@@ -21,7 +20,7 @@ export interface AppConfig {
   // Environment variables for Claude processes
   claudeEnvironmentVariables?: Record<string, string>;
   // Smart session names configuration
-  sessionNamesApiKey?: string;
-  sessionNamesBaseUrl?: string;
-  sessionNamesModel?: string;
+  anthropicApiKey?: string;
+  anthropicBaseUrl?: string;
+  anthropicModel?: string;
 }
